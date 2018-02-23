@@ -33,7 +33,15 @@ def index():
 		print(sentence, end="\n\n")
 
 	# return the summary sentences
-	return json.dumps([" ".join(x.words) for x in summary])
+	sentences = [" ".join(x.words) for x in summary]
+	message = "<ol>"
+
+	for sentence in sentences:
+		message += "<li>" + sentence + "</li>"
+	message += "</ol>"
+
+
+	return json.dumps(message)
 
 if __name__ == "__main__":
 	app.run()

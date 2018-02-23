@@ -14,8 +14,11 @@ chrome.runtime.onMessage.addListener(
 	xhr.send(request.data);
 
 	// xhr.rsponse contains the summary from background.py
+	var summary = xhr.response
+
+	// document.getElementById('x').innerHTML = summary;
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		  chrome.tabs.sendMessage(tabs[0].id, {resp: xhr.response}, function(response) {
+		  chrome.tabs.sendMessage(tabs[0].id, {resp: summary}, function(response) {
 		    // nothing
 		  });
 	});
