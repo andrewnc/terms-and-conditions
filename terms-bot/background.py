@@ -9,8 +9,10 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.kl import KLSummarizer
 
+import unidecode
+
 # file structure for display, will update
-HTML_OPEN = "<div id=\"mainPopup\"><h1>Welcome to legal summary bot</h1>"
+HTML_OPEN = "<div id='mainPopup'>"
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -27,6 +29,7 @@ def index():
     req = request.form
     text_data = " ".join(list(req.keys()))
 
+    text_data = unidecode.unidecode(text_data)
     clean_list, pure_list = prepare_for_regex(text_data)
 
     data_to_summarize = []
@@ -45,13 +48,13 @@ def index():
 
     # return the summary sentences
     sentences = [str(x) for x in summary]
-    message = HTML_OPEN + "<ol>"
+    message = HTML_OPEN + "<ul class='rolldown-list' id='myList'>"
 
     for sentence in sentences:
         # TODO: logging in the future
         message += "<li>" + sentence + "</li>"
 
-    message += "</ol></div>"
+    message += "</ul></div>"
 
     # sends response back to the extension
     return json.dumps(message)

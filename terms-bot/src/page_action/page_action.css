@@ -1,0 +1,74 @@
+#mainPopup {
+    padding: 10px;
+    height: 200px;
+    width: 400px;
+    /*font-family: Helvetica, Ubuntu, Arial, sans-serif;*/
+    font-family: 'Roboto', sans-serif;
+}
+
+h1 {
+    font-size: 2em;
+    text-align: center;
+    color: black;
+}
+
+html,body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font: 'Oswald', sans-serif;
+  color: #fff;
+  text-align: right;
+  /*overflow: visible;*/
+}
+
+.rolldown-list {
+  text-align: left;
+  padding: 0;
+  margin: 0;
+}
+
+.rolldown-list li {
+  padding: 1em;
+  margin-bottom: .125em;
+  display: block;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.rolldown-list li {
+  /*visibility: hidden;*/
+  animation: rolldown .7s 1;
+  transform-origin: 50% 0;
+  animation-fill-mode: forwards;
+}
+
+.rolldown-list li:nth-child(2n) {
+  background-color: #444;
+}
+
+.rolldown-list li:nth-child(2n+1) {
+  background-color: #333;
+}
+
+#myList {
+  position: absolute;
+  margin-right: 15px;
+}
+
+@keyframes rolldown {
+  0% {
+    visibility: visible;
+    transform: rotateX(180deg) perspective(500px);
+  }
+  70% {
+    visibility: visible;
+    transform: rotateX(-20deg);
+  }
+  100% {
+    visibility: visible;
+    transform: rotateX(0deg);
+  }
+}
