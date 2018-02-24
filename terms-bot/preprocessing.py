@@ -1,7 +1,6 @@
 from threading import Thread
 from queue import Queue, Empty
 import numpy as np
-from copy import copy
 import string
 
 
@@ -59,6 +58,3 @@ def __prepare_bow__(q, vocab, result_matrix):
             # result_matrix[i, :] = result
         except Empty:
             return
-
-print(prepare_for_regex("This is clause one.\nAnother clause begins here. But then it keeps going.\n"))
-
