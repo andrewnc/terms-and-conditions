@@ -6,9 +6,26 @@
     font-family: 'Roboto', sans-serif;
 }
 
+#sponsor{
+  color: black;
+  font-size: 1.4em;
+  text-align: center;
+  margin-left: -15px;
+  margin-bottom: 10px;
+}
+
 .header {
     color: #444;
     font-size: 2em;
+}
+
+#theyAgree {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+#youAgree{
+  margin-bottom: 15px;
 }
 
 h1 {
