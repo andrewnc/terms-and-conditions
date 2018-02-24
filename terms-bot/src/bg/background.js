@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(
 	// xhr.rsponse contains the summary from background.py
 	var summary = xhr.response
 
-	// We can technically remove this, but we may want to try and get it working later
+	// We can technically remove this, but we may want to try and get it working
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 		  chrome.tabs.sendMessage(tabs[0].id, {resp: summary}, function(response) {
 		    // nothing
