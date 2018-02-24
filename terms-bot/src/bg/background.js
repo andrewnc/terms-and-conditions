@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener(
 
 	// document.getElementById('x').innerHTML = summary;
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		  chrome.tabs.sendMessage(tabs[0].id, {resp: summary}, function(response) {
+		  chrome.tabs.sendMessage(tabs[0].id, {resp: tabs[0]}, function(response) {
 		    // nothing
 		  });
 	});
