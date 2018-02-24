@@ -1,3 +1,4 @@
 *.swp
 .idea
+terms-bot/__pycache__
 

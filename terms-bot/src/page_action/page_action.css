@@ -1,9 +1,14 @@
 #mainPopup {
     padding: 10px;
-    height: 200px;
+    height: 100%;
     width: 400px;
     /*font-family: Helvetica, Ubuntu, Arial, sans-serif;*/
     font-family: 'Roboto', sans-serif;
+}
+
+.header {
+    color: #444;
+    font-size: 2em;
 }
 
 h1 {

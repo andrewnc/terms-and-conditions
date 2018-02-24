@@ -13,6 +13,9 @@ import unidecode
 
 # file structure for display, will update
 HTML_OPEN = "<div id='mainPopup'>"
+YOU_AGREE_HEADER = "<div id='youAgree' class='header'>What You Agree</div>"
+THEY_AGREE_HEADER = "<div id='theyAgree' class='header'>What They Agree</div>"
+OTHER_HEADER = "<div id='other' class='header'>Other Clauses</div>"
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -50,9 +53,39 @@ def index():
     sentences = [str(x) for x in summary]
     message = HTML_OPEN + "<ul class='rolldown-list' id='myList'>"
 
+    you_agree = []
+    they_agree = []
+    other_clause = []
     for sentence in sentences:
         # TODO: logging in the future
-        message += "<li>" + sentence + "</li>"
+        lower = sentence.lower()
+        you_idx = lower.find("you")
+        they_idx = lower.find("we")
+        if (you_idx == -1 or you_idx > 15) and (they_idx == -1 or they_idx > 15):
+            other_clause.append(sentence)
+        elif you_idx == -1:
+            they_agree.append(sentence)
+        elif they_idx == -1:
+            you_agree.append(sentence)
+        elif you_idx < they_idx:
+            you_agree.append(sentence)
+        else:
+            they_agree.append(sentence)
+
+    if len(you_agree) > 0:
+        message += YOU_AGREE_HEADER + "<li>"
+        message += "</li><li>".join(you_agree)
+        message += "</li>"
+
+    if len(they_agree) > 0:
+        message += THEY_AGREE_HEADER + "<li>"
+        message += "</li><li>".join(they_agree)
+        message += "</li>"
+
+    if len(other_clause) > 0:
+        message += OTHER_HEADER + "<li>"
+        message += "</li><li>".join(other_clause)
+        message += "</li>"
 
     message += "</ul></div>"
 
