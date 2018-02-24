@@ -6,7 +6,6 @@ chrome.runtime.sendMessage({status: 'sending', data:document.body.innerText, url
 		clearInterval(readyStateCheckInterval);
 		// send info from this function call
 		console.log('sending');
-		console.log(document.body.innerText)
 	}
 	}, 30);
 });
@@ -18,6 +17,7 @@ chrome.runtime.onMessage.addListener(
 		var info = {
 			data: request.resp
 		}
-		sendResponse(info)
+
+		// here we log the response, if they want it
 		console.log(request.resp);
 });

@@ -9,6 +9,7 @@ from sumy.nlp.stemmers import Stemmer
 
 from sumy.summarizers.kl import KLSummarizer
 
+# file structure for display, will update
 HTML_OPEN = """
 <!doctype html>
 <head>
@@ -46,7 +47,7 @@ def index():
 	stemmer = Stemmer(LANGUAGE)
 	summarizer = KLSummarizer(stemmer)
 
-	# show summary
+	# get summary
 	summary = summarizer(parser.document, SENTENCES_COUNT)
 
 	# return the summary sentences
@@ -54,14 +55,16 @@ def index():
 	message = HTML_OPEN + "\n<ol>"
 
 	for sentence in sentences:
+		# here we can do logging in the future
 		print(sentence)
 		message += "<li>" + sentence + "</li>"
+
 	message += "</ol>\n</div>"
 
 	with open("summary.html", 'w') as f:
 		f.write(message)
 
-
+	# sends response back to the extension
 	return json.dumps(message)
 
 if __name__ == "__main__":

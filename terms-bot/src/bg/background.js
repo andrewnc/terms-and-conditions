@@ -10,15 +10,15 @@ chrome.runtime.onMessage.addListener(
 	//Send the proper header information along with the request
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhr.withCredentials = false;
-	// xhr.send(JSON.stringify(request));
+
 	xhr.send(request.data);
 
 	// xhr.rsponse contains the summary from background.py
 	var summary = xhr.response
 
-	// document.getElementById('x').innerHTML = summary;
+	// We can technically remove this, but we may want to try and get it working later
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		  chrome.tabs.sendMessage(tabs[0].id, {resp: tabs[0]}, function(response) {
+		  chrome.tabs.sendMessage(tabs[0].id, {resp: summary}, function(response) {
 		    // nothing
 		  });
 	});
