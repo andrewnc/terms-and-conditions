@@ -19,7 +19,7 @@
     font-size: 2em;
 }
 
-#theyAgree {
+#theyAgree, #other {
   margin-top: 15px;
   margin-bottom: 15px;
 }
