@@ -1,7 +1,7 @@
 import json
 import re
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS
 from preprocessing import prepare_for_regex
 from sumy.nlp.stemmers import Stemmer
@@ -19,6 +19,10 @@ OTHER_HEADER = "<div id='other' class='header'>Other Clauses</div>"
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.route("/")
+def serve_homepage():
+    return render_template("Legal Leaf.htm")
 
 
 @app.route('/background.py', methods=['POST', 'GET', 'OPTIONS'])
