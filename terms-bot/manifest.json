@@ -4,6 +4,7 @@
   "manifest_version": 2,
   "description": "We read the terms and conditions so you don't have to",
   "homepage_url": "https://andrewnc.github.io",
+  "options_page": "src/options/options.html",
   "icons": {
     "16": "icons/icon.png",
     "48": "icons/icon.png",
@@ -22,7 +23,8 @@
     "default_popup": "src/page_action/page_action.html"
   },
   "permissions": [
-    "https://*/*"
+    "https://*/*",
+    "storage"
   ],
   "content_scripts": [
     {
