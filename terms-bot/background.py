@@ -39,16 +39,19 @@ def index():
     req = request.form
     url = " ".join(list(req.keys()) + list(req.values()))
     # logging can be done here
-    # print(url)
-    url = url.strip()
 
+    url = url.strip()
 
     # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
     # get the home page and search for terms
     home_page_text = BeautifulSoup(requests.get("http://"+url).text, 'html.parser')
     terms_text = ""
     for link in home_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
-        terms_text += BeautifulSoup(requests.get("http://"+url+link['href']).text, 'html.parser').text
+        # TODO: check if link is relative, current solution below
+        if "http" in link['href']:
+            terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
+        else:
+            terms_text += BeautifulSoup(requests.get("http://"+url+link['href']).text, 'html.parser').text
 
     text_data = unidecode.unidecode(terms_text)
     clean_list, pure_list = prepare_for_regex(text_data)
@@ -66,6 +69,9 @@ def index():
 
     # get summary
     summary = summarizer(parser.document, SENTENCES_COUNT)
+
+    if len(summary) == 0:
+        summary = ["No Terms"]
 
     # return the summary sentences
     sentences = [str(x) for x in summary]
