@@ -1,17 +1,24 @@
-var words = new Set(['terms', 'service', 'legal', 'agreement']);
+// var words = new Set(['terms', 'service', 'legal', 'agreement']);
 
 // change data if you want to have something else scraped
-var body_text = document.body.innerText;
-var text_list = body_text.split(" ");
-var send_data = false;
+// var body_text = document.body.innerText;
+// var text_list = body_text.split(" ");
 
-for (var i = 0; i < text_list.length; i++) {
-    if (words.has(text_list[i].toLowerCase())) {
-        send_data = true;
-        break;
-    }
-}
+// scraping moved to server
+var body_text = window.location.hostname;
+var send_data = true;
 
+// for (var i = 0; i < text_list.length; i++) {
+//     if (words.has(text_list[i].toLowerCase())) {
+//         send_data = true;
+//         break;
+//     }
+// }
+
+// console.log(body_text);
+// console.log(send_data);
+
+// no longer need this check
 if (send_data) {
     chrome.runtime.sendMessage({
         status: 'sending',
@@ -40,5 +47,7 @@ if (send_data) {
                 sendResponse(info);
             }
         });
+}else{
+    console.log("don't run");
 }
 

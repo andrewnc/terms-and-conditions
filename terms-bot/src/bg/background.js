@@ -5,13 +5,14 @@ chrome.runtime.onMessage.addListener(
         var xhr = new XMLHttpRequest();
 
         // this will change if we host somewhere
-        // xhr.open("POST", 'http://127.0.0.1:5000/background.py', false);
-        xhr.open("POST", 'http://legalleaf.pythonanywhere.com/background.py', false);
+        xhr.open("POST", 'http://127.0.0.1:5000/background.py', false);
+        // xhr.open("POST", 'http://legalleaf.pythonanywhere.com/background.py', false);
 
         //Send the proper header information along with the request
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.withCredentials = false;
 
+        // this is currently just the hostname
         xhr.send(request.data);
 
         // xhr.rsponse contains the summary from background.py
