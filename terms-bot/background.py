@@ -1,7 +1,10 @@
 import json
 import re
 
-from flask import Flask, request
+import requests
+from bs4 import BeautifulSoup
+
+from flask import Flask, request, render_template
 from flask_cors import CORS
 from preprocessing import prepare_for_regex
 from sumy.nlp.stemmers import Stemmer
@@ -20,6 +23,10 @@ OTHER_HEADER = "<div id='other' class='header'>Other Clauses</div>"
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+@app.route("/")
+def serve_homepage():
+    return render_template("Legal Leaf.htm")
+
 
 @app.route('/background.py', methods=['POST', 'GET', 'OPTIONS'])
 def index():
@@ -30,9 +37,23 @@ def index():
 
     # extract data from the extension
     req = request.form
-    text_data = " ".join(list(req.keys()))
+    url = " ".join(list(req.keys()) + list(req.values()))
+    # logging can be done here
 
-    text_data = unidecode.unidecode(text_data)
+    url = url.strip()
+
+    # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
+    # get the home page and search for terms
+    home_page_text = BeautifulSoup(requests.get("http://"+url).text, 'html.parser')
+    terms_text = ""
+    for link in home_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
+        # TODO: check if link is relative, current solution below
+        if "http" in link['href']:
+            terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
+        else:
+            terms_text += BeautifulSoup(requests.get("http://"+url+link['href']).text, 'html.parser').text
+
+    text_data = unidecode.unidecode(terms_text)
     clean_list, pure_list = prepare_for_regex(text_data)
 
     data_to_summarize = []
@@ -48,6 +69,9 @@ def index():
 
     # get summary
     summary = summarizer(parser.document, SENTENCES_COUNT)
+
+    if len(summary) == 0:
+        summary = ["No Terms"]
 
     # return the summary sentences
     sentences = [str(x) for x in summary]
