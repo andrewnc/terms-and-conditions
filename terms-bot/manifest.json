@@ -1,13 +1,13 @@
 {
-  "name": "Terms and Conditions",
+  "name": "Legal Leaf",
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "We read the terms and conditions so you don't have to",
   "homepage_url": "https://andrewnc.github.io",
   "icons": {
-    "16": "icons/icon.png",
-    "48": "icons/icon.png",
-    "128": "icons/icon.png"
+    "16": "icons/leaf.png",
+    "48": "icons/leaf.png",
+    "128": "icons/leaf.png"
   },
   "default_locale": "en",
   "background": {
@@ -17,12 +17,15 @@
     "persistent": false
   },
   "page_action": {
-    "default_icon": "icons/secret.png",
-    "default_title": "Summarize",
+    "default_icon": "icons/leaf.png",
+    "default_title": "See Terms Summary",
     "default_popup": "src/page_action/page_action.html"
   },
   "permissions": [
+    "<all_urls>",
+    "http://*/*",
     "https://*/*"
+
   ],
   "content_scripts": [
     {
