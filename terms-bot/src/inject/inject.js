@@ -5,7 +5,7 @@
 // var text_list = body_text.split(" ");
 
 // scraping moved to server
-var body_text = window.location.hostname;
+var body_text = window.location.href;
 var send_data = true;
 
 // for (var i = 0; i < text_list.length; i++) {

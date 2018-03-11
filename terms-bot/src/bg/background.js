@@ -3,11 +3,15 @@ var DEFAULT_IP = "legalleaf.pythonanywhere.com";
 var DEFAULT_PORT = "5000";
 var DEFAULT_PATH = "/background.py";
 
+var PROTOCOL = "https://"
+var DEFAULT_PATH = "/webapi/summarize";
+
 function sendRequest(ip, port, path, data) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", PROTOCOL + ip + ":" + port + path, false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.withCredentials = false;
+    console.log(data);
     xhr.send(data);
 
     // xhr.rsponse contains the summary from background.py
