@@ -161,7 +161,8 @@ def index():
     # current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
     # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
 
-    return summarize(requests.get(url).text, url)
+    text = summarize(requests.get(url).text, url)
+    return json.dumps(text)
 
     # links = []
     # google_results = BeautifulSoup(requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text, 'html.parser')
