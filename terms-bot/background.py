@@ -160,8 +160,8 @@ def index():
     # get the home page and search for terms
     # current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
     # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
-
-    text = summarize(requests.get(url).text, url)
+    body_text = requests.get(url).text
+    text = summarize(body_text, url)
     return json.dumps(text)
 
     # links = []
