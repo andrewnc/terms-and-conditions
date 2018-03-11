@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(
             port: ""
         }, function (items) {
             if (items.developerMode === false)
-                sendRequest(DEFAULT_IP, DEFAULT_PORT, DEFAULT_PATH,request.data);
+                sendRequest(DEFAULT_IP, DEFAULT_PORT, DEFAULT_PATH, request.data);
             else
                 sendRequest(items.serverIp, items.port, DEFAULT_PATH, request.data);
         });

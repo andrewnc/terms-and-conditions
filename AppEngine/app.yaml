@@ -1,0 +1,44 @@
+# To start app:
+#   gcloud app deploy app.yaml --project legal-leaf --version v1
+# To delete app:
+#   Get id by running:
+#     gcloud app instances list
+#   Then stop app with that id:
+#     gcloud app instances delete id --service=default --version=v1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /
+  script: main.app
+
+- url: /webapi/summarize
+  script: main.app
+
+libraries:
+- name: numpy
+  version: "1.6.1"
+
+- name: ssl
+  version: latest
+
+env_variables:
+  NLTK_DATA: "lib/nltk_data/"
+
+#- url: /index\.html
+#  script: home.app
+#
+#- url: /stylesheets
+#  static_dir: stylesheets
+#
+#- url: /(.*\.(gif|png|jpg))$
+#  static_files: static/\1
+#  upload: static/.*\.(gif|png|jpg)$
+#
+#- url: /admin/.*
+#  script: admin.app
+#  login: admin
+#
+#- url: /.*
+#  script: not_found.app
