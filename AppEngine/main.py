@@ -13,11 +13,15 @@ import unidecode
 
 from preprocessing import prepare_for_regex
 
+import logging
+
 # globals
 LANGUAGE = 'english'
 SENTENCES_COUNT = 10
-clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)")
+clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)", re.IGNORECASE)
 host_reg = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
+terms_page = re.compile(r"(terms *(((and|&)? *conditions)|((of)? ?(service|use))))", re.IGNORECASE)
+terms_link_finder = re.compile(r"(T|t)erms")
 
 # file structure for display, will update
 HTML_OPEN = "<div id='mainPopup'>"
@@ -37,7 +41,7 @@ class MainPage(webapp2.RequestHandler):
 class SummarizerHandler(webapp2.RequestHandler):
     def post(self):
         self.response.headers['Content-Type'] = 'text/json'
-        self.response.write(summarize(self.request.body))
+        self.response.write(summarize(self.request.body, self.request.headers['target_url']))
 
 
 app = webapp2.WSGIApplication([
@@ -46,30 +50,43 @@ app = webapp2.WSGIApplication([
 ], debug=True)
 
 
-def summarize(url):
+def summarize(html_body, url):
+    html_soup = BeautifulSoup(html_body, "html.parser")
+    body_txt = html_soup.text
     url = url.strip()
-    host_url = re.search(host_reg, url).group(1)
-    current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
 
-    links = []
-    google_results = BeautifulSoup(
-        requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text,
-        'html.parser')
-    for link in google_results.find_all("div", {"class": "g"})[:1]:
-        links.append(urlparse(link.find("a").attrs['href'][7:].split("&")[0]))
+    is_terms_page = re.match(terms_page, body_txt)
+    if not is_terms_page:
+        body_txt = find_terms_text(html_soup, url)
+    return summarize_terms_text(body_txt)
+
+
+def find_terms_text(html_soup, url):
+    host_url = re.search(host_reg, url).group(1)
 
     terms_text = ""
-    for link in current_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
+    for link in html_soup.find_all("a", text=terms_link_finder):
         if "http" in link['href']:
             terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
         else:
             terms_text += BeautifulSoup(requests.get("http://" + host_url + link['href']).text, 'html.parser').text
 
     if terms_text == "":
+        links = []
+        google_results = BeautifulSoup(
+            requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text,
+            'html.parser')
+        for link in google_results.find_all("div", {"class": "g"})[:1]:
+            links.append(urlparse(link.find("a").attrs['href'][7:].split("&")[0]))
+
         for link in links:
             terms_text += BeautifulSoup(requests.get(link).text, 'html.parser').text
 
-    text_data = unidecode.unidecode(terms_text)
+    return terms_text
+
+
+def summarize_terms_text(txt):
+    text_data = unidecode.unidecode(txt)
     clean_list, pure_list = prepare_for_regex(text_data)
 
     data_to_summarize = []
