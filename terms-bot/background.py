@@ -1,5 +1,6 @@
 import json
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,8 +12,10 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.kl import KLSummarizer
+# from sumy.summarizers.lex_rank import LexRankSummarizer as KLSummarizer
 
 import unidecode
+from urllib.parse import unquote
 
 # file structure for display, will update
 HTML_OPEN = "<div id='mainPopup'>"
@@ -26,14 +29,24 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 @app.route("/")
 def serve_homepage():
     return render_template("Legal Leaf.htm")
-
+def decomp(soup):
+    try:
+        soup.footer.decompose()
+    except:
+        soup = soup
+    try:
+        soup.head.decompose()
+    except:
+        soup = soup
+    return soup
 
 @app.route('/background.py', methods=['POST', 'GET', 'OPTIONS'])
 def index():
     # globals
     LANGUAGE = 'english'
     SENTENCES_COUNT = 10
-    clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)")
+    clause = re.compile("(reserves the right)|(loss)|(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)")
+    host_reg = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
 
     # extract data from the extension
     req = request.form
@@ -41,18 +54,49 @@ def index():
     # logging can be done here
 
     url = url.strip()
+    host_url = re.search(host_reg, url)['host']
+
 
     # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
     # get the home page and search for terms
-    home_page_text = BeautifulSoup(requests.get("http://"+url).text, 'html.parser')
-    terms_text = ""
-    for link in home_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
-        # TODO: check if link is relative, current solution below
-        if "http" in link['href']:
-            terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
-        else:
-            terms_text += BeautifulSoup(requests.get("http://"+url+link['href']).text, 'html.parser').text
+    current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
+    # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
+    links = []
+    google_results = BeautifulSoup(requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text, 'html.parser')
+    for link in google_results.find_all("div", {"class":"g"})[:1]:
+        links.append(unquote(link.find("a").attrs['href'][7:].split("&")[0]))
 
+    # print(links)
+    # print(current_page_text, home_page_text)
+
+    # print(current_page_text)
+    # print(current_page_text.find_all("a", text=re.compile(r"(T|t)erms")))
+    # check the current page for links if possible
+    terms_text = ""
+    for link in current_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
+        if "http" in link['href']:
+            soup = BeautifulSoup(requests.get(link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
+        else:
+            
+            soup = BeautifulSoup(requests.get("http://"+host_url+link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
+
+    # # if we couldnt' find the terms there, check the home page
+    # if terms_text == "":
+    #     for link in home_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
+    #         if "http" in link['href']:
+    #             terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
+    #         else:
+    #             terms_text += BeautifulSoup(requests.get("http://"+host_url+link['href']).text, 'html.parser').text
+    if terms_text == "":
+        for link in links:
+            soup = BeautifulSoup(requests.get(link).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
+    
     text_data = unidecode.unidecode(terms_text)
     clean_list, pure_list = prepare_for_regex(text_data)
 
