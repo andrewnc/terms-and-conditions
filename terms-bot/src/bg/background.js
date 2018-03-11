@@ -8,6 +8,7 @@ function sendRequest(protocol, ip, port, path, data) {
     xhr.open("POST", protocol + ip + ":" + port + path, false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.withCredentials = false;
+    console.log(data);
     xhr.send(data);
 
     // xhr.rsponse contains the summary from background.py

@@ -10,8 +10,10 @@
   color: black;
   font-size: 1.4em;
   text-align: center;
-  margin-left: -15px;
+  /*margin-left: -15px;*/
   margin-bottom: 10px;
+  position: fixed;
+  bottom: 0;
 }
 
 .header {
