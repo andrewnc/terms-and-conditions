@@ -158,7 +158,8 @@ def index():
     # req = request.form
     # url = " ".join(list(req.keys()) + list(req.values()))
     # logging can be done here
-    body_text, url = request.data, request.headers['target_url']
+    body_text, url = request.data, request.headers.get('Target-Url')
+    print(request.headers)
 
     url = url.strip()
     host_url = re.search(host_reg, url)['host']
