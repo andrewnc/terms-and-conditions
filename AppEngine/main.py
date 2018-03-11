@@ -5,7 +5,6 @@ from urlparse import urlparse
 import webapp2
 import requests
 from bs4 import BeautifulSoup
-# from nltk.stem.snowball import EnglishStemmer as Stemmer
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser

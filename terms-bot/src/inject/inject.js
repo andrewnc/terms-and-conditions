@@ -1,4 +1,4 @@
-var body_text = window.location.hostname;
+var body_text = window.location.href;
 chrome.runtime.sendMessage({
     status: 'sending',
     data: body_text,
