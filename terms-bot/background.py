@@ -19,7 +19,7 @@ from urllib.parse import unquote
 
 # globals
 LANGUAGE = 'english'
-SENTENCES_COUNT = 15
+SENTENCES_COUNT = 10
 clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)", re.IGNORECASE)
 host_reg = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
 terms_page = re.compile(r"(terms *(((and|&)? *conditions)|((of)? ?(service|use))))", re.IGNORECASE)
@@ -66,20 +66,27 @@ def find_terms_text(html_soup, url):
     terms_text = ""
     for link in html_soup.find_all("a", text=terms_link_finder):
         if "http" in link['href']:
-            terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get(link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
         else:
-            terms_text += BeautifulSoup(requests.get("https://" + host_url + link['href']).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get("http://"+host_url+link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
 
     if terms_text == "":
+        print("googling", host_url)
         links = []
         google_results = BeautifulSoup(
             requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text,
             'html.parser')
         for link in google_results.find_all("div", {"class": "g"})[:1]:
-            links.append(urlparse(link.find("a").attrs['href'][7:].split("&")[0]))
+            links.append(unquote(link.find("a").attrs['href'][7:].split("&")[0]))
 
         for link in links:
-            terms_text += BeautifulSoup(requests.get(link).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get(link).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
 
     return terms_text
 
@@ -148,9 +155,10 @@ def summarize_terms_text(txt):
 @app.route('/background.py', methods=['POST', 'GET', 'OPTIONS'])
 def index():
     # globals
-    req = request.form
-    url = " ".join(list(req.keys()) + list(req.values()))
+    # req = request.form
+    # url = " ".join(list(req.keys()) + list(req.values()))
     # logging can be done here
+    body_text, url = request.data, request.headers['target_url']
 
     url = url.strip()
     host_url = re.search(host_reg, url)['host']
@@ -160,7 +168,6 @@ def index():
     # get the home page and search for terms
     # current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
     # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
-    body_text = requests.get(url).text
     text = summarize(body_text, url)
     return json.dumps(text)
 
