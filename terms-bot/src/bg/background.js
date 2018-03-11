@@ -1,14 +1,11 @@
-var PROTOCOL = "http://";
-var DEFAULT_IP = "legalleaf.pythonanywhere.com";
-var DEFAULT_PORT = "5000";
-var DEFAULT_PATH = "/background.py";
-
-var PROTOCOL = "https://"
+var PROTOCOL = "https://";
+var DEFAULT_IP = "legal-leaf.appspot.com";
+var DEFAULT_PORT = "443";
 var DEFAULT_PATH = "/webapi/summarize";
 
-function sendRequest(ip, port, path, data) {
+function sendRequest(protocol, ip, port, path, data) {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", PROTOCOL + ip + ":" + port + path, false);
+    xhr.open("POST", protocol + ip + ":" + port + path, false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.withCredentials = false;
     console.log(data);
@@ -31,12 +28,14 @@ chrome.runtime.onMessage.addListener(
         // Get the server based on storage
         chrome.storage.sync.get({
             developerMode: false,
+            protocol: "",
             serverIp: "",
-            port: ""
+            port: "",
+            path: ""
         }, function (items) {
             if (items.developerMode === false)
-                sendRequest(DEFAULT_IP, DEFAULT_PORT, DEFAULT_PATH,request.data);
+                sendRequest(PROTOCOL, DEFAULT_IP, DEFAULT_PORT, DEFAULT_PATH, request.data);
             else
-                sendRequest(items.serverIp, items.port, DEFAULT_PATH, request.data);
+                sendRequest(items.protocol, items.serverIp, items.port, items.path, request.data);
         });
     });
