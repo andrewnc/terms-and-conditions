@@ -37,7 +37,7 @@ class MainPage(webapp2.RequestHandler):
 
 class SummarizerHandler(webapp2.RequestHandler):
     def post(self):
-        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.headers['Content-Type'] = 'text/json'
         self.response.write(summarize(self.request.body))
 
 
@@ -50,11 +50,8 @@ app = webapp2.WSGIApplication([
 def summarize(url):
     url = url.strip()
     host_url = re.search(host_reg, url).group(1)
-
-    # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
-    # get the home page and search for terms
     current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
-    # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
+
     links = []
     google_results = BeautifulSoup(
         requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text,
@@ -62,12 +59,6 @@ def summarize(url):
     for link in google_results.find_all("div", {"class": "g"})[:1]:
         links.append(urlparse(link.find("a").attrs['href'][7:].split("&")[0]))
 
-    # print(links)
-    # print(current_page_text, home_page_text)
-
-    # print(current_page_text)
-    # print(current_page_text.find_all("a", text=re.compile(r"(T|t)erms")))
-    # check the current page for links if possible
     terms_text = ""
     for link in current_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
         if "http" in link['href']:
@@ -75,13 +66,6 @@ def summarize(url):
         else:
             terms_text += BeautifulSoup(requests.get("http://" + host_url + link['href']).text, 'html.parser').text
 
-    # # if we couldnt' find the terms there, check the home page
-    # if terms_text == "":
-    #     for link in home_page_text.find_all("a", text=re.compile(r"(T|t)erms")):
-    #         if "http" in link['href']:
-    #             terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
-    #         else:
-    #             terms_text += BeautifulSoup(requests.get("http://"+host_url+link['href']).text, 'html.parser').text
     if terms_text == "":
         for link in links:
             terms_text += BeautifulSoup(requests.get(link).text, 'html.parser').text
@@ -95,18 +79,15 @@ def summarize(url):
             data_to_summarize.append(pure)
 
     text_data = " ".join(data_to_summarize)
-    # create parsers and summarize
     parser = PlaintextParser(text_data, Tokenizer(LANGUAGE))
     stemmer = Stemmer(LANGUAGE)
     summarizer = KLSummarizer(stemmer)
 
-    # get summary
     summary = summarizer(parser.document, SENTENCES_COUNT)
 
     if len(summary) == 0:
         summary = ["No Terms"]
 
-    # return the summary sentences
     sentences = [str(x) for x in summary]
     message = HTML_OPEN + "<ul class='rolldown-list' id='myList'>"
 
@@ -146,5 +127,4 @@ def summarize(url):
 
     message += "</ul></div>"
 
-    # sends response back to the extension
     return json.dumps(message)
