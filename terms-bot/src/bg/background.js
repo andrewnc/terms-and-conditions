@@ -7,7 +7,8 @@ var DEFAULT_PATH = "webapi/summarize";
 function sendRequest(protocol, ip, port, path, req) {
     console.log("Received a message to get a request");
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", protocol + ip + ":" + port + path, false);
+    // xhr.open("POST", protocol + ip + ":" + port + path, false);
+    xhr.open("POST", "https://legal-leaf.appspot.com:443/webapi/summarize");
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("target_url", req.url);
     xhr.withCredentials = false;

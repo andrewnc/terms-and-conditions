@@ -17,7 +17,7 @@ import logging
 
 # globals
 LANGUAGE = 'english'
-SENTENCES_COUNT = 10
+SENTENCES_COUNT = 15
 clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)", re.IGNORECASE)
 host_reg = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
 terms_page = re.compile(r"(terms *(((and|&)? *conditions)|((of)? ?(service|use))))", re.IGNORECASE)
@@ -69,7 +69,7 @@ def find_terms_text(html_soup, url):
         if "http" in link['href']:
             terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
         else:
-            terms_text += BeautifulSoup(requests.get("http://" + host_url + link['href']).text, 'html.parser').text
+            terms_text += BeautifulSoup(requests.get("https://" + host_url + link['href']).text, 'html.parser').text
 
     if terms_text == "":
         links = []
