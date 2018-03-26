@@ -50,6 +50,11 @@ def decomp(soup):
         soup.head.decompose()
     except:
         soup = soup
+    try:
+        for script in soup(["script", "style"]):
+            script.decompose()    # rip it out
+    except:
+        soup = soup
     return soup
 
 def summarize(html_body, url, skip=False):
