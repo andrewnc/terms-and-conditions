@@ -17,7 +17,7 @@ from sumy.summarizers.kl import KLSummarizer
 import unidecode
 from urllib.parse import unquote
 
-with open("netflix.txt") as f:
+with open("/home/legalleaf/terms-bot/netflix.txt", 'r') as f:
     NETFLIX_TEXT = f.read()
 
 # globals
@@ -52,14 +52,14 @@ def decomp(soup):
         soup = soup
     return soup
 
-def summarize(html_body, url):
+def summarize(html_body, url, skip=False):
     html_soup = BeautifulSoup(html_body, "html.parser")
     body_txt = html_soup.text
     url = url.strip()
 
     is_terms_page = re.match(terms_page, body_txt)
-    if not is_terms_page:
-        body_txt = find_terms_text(html_soup, url)
+    #if not is_terms_page and not skip:
+    #    body_txt = find_terms_text(html_soup, url)
     return summarize_terms_text(body_txt)
 
 
@@ -111,7 +111,7 @@ def summarize_terms_text(txt):
     summary = summarizer(parser.document, SENTENCES_COUNT)
 
     if len(summary) == 0:
-        summary = ["No Terms"]
+        summary = ["No Terms found, if this is wrong, contact us at andrew@leaf.legal"]
 
     sentences = [str(x) for x in summary]
     message = HTML_OPEN + "<ul class='rolldown-list' id='myList'>"
@@ -161,18 +161,17 @@ def index():
     # req = request.form
     # url = " ".join(list(req.keys()) + list(req.values()))
     # logging can be done here
-    body_text, url = request.data, request.headers.get('targeturl')
-
+    #body_text, url = request.data, request.headers.get('targeturl')
+    body_text, url = "".join(list(request.form.keys())+list(request.form.values())), request.headers.get("targeturl")
     url = url.strip()
     host_url = re.search(host_reg, url)['host']
-
     if(host_url == "www.netflix.com"):
         body_text = NETFLIX_TEXT
     # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
     # get the home page and search for terms
     # current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
     # home_page_text = BeautifulSoup(requests.get("http://"+host_url).text, 'html.parser')
-    text = summarize(body_text, url)
+    text = summarize(body_text, url, skip=True)
     return json.dumps(text)
 
     # links = []
