@@ -5,16 +5,22 @@
 #     gcloud app instances list
 #   Then stop app with that id:
 #     gcloud app instances delete id --service=default --version=v1
+#
+# Will be hosted at https://legal-leaf.appspot.com:443
+#
+# To install requirements:
+#   Add any requirements to the requirements.txt file
+#   pip install -r requirements.txt -t lib
 runtime: python27
 api_version: 1
 threadsafe: true
 
 handlers:
 - url: /
-  script: main.app
+  script: gae_server.app
 
 - url: /webapi/summarize
-  script: main.app
+  script: gae_server.app
 
 libraries:
 - name: numpy

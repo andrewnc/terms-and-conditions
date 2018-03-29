@@ -1,15 +1,12 @@
 var PROTOCOL = "https://";
 var DEFAULT_IP = "legal-leaf.appspot.com";
 var DEFAULT_PORT = "443";
-var DEFAULT_PATH = "webapi/summarize";
+var DEFAULT_PATH = "/webapi/summarize";
 
 
 function sendRequest(protocol, ip, port, path, req) {
-    console.log("Received a message to get a request");
     var xhr = new XMLHttpRequest();
-    // xhr.open("POST", protocol + ip + ":" + port + path, false);
-    // xhr.open("POST", "https://legal-leaf.appspot.com:443/webapi/summarize", false);
-    xhr.open("POST", "http://legalleaf.pythonanywhere.com/background.py", false)
+    xhr.open("POST", protocol + ip + ":" + port + path, false);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("target_url", req.url);
     xhr.withCredentials = false;

@@ -1,9 +1,7 @@
-from __future__ import print_function
 from threading import Thread
 import numpy as np
 import string
 import sys
-
 
 if sys.version_info >= (3, 0):
     from queue import Queue, Empty
@@ -20,7 +18,7 @@ def _python2_clean_sentences(pure_sentences):
 
 def _python3_clean_sentences(pure_sentences):
     clean_sentences = []
-    translator=str.maketrans('','',string.punctuation)
+    translator = str.maketrans('', '', string.punctuation)
     for x in pure_sentences:
         clean_sentences.append(' '.join(x.lower().translate(translator).split()))
     return clean_sentences
