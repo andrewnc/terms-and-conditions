@@ -17,8 +17,8 @@ from sumy.summarizers.kl import KLSummarizer
 import unidecode
 from urllib.parse import unquote
 
-with open("/home/legalleaf/terms-bot/netflix.txt", 'r') as f:
-    NETFLIX_TEXT = f.read()
+# with open("/home/legalleaf/terms-bot/netflix.txt", 'r') as f:
+#     NETFLIX_TEXT = f.read()
 
 # globals
 LANGUAGE = 'english'
@@ -170,8 +170,8 @@ def index():
     body_text, url = "".join(list(request.form.keys())+list(request.form.values())), request.headers.get("targeturl")
     url = url.strip()
     host_url = re.search(host_reg, url)['host']
-    if(host_url == "www.netflix.com"):
-        body_text = NETFLIX_TEXT
+    # if(host_url == "www.netflix.com"):
+    #     body_text = NETFLIX_TEXT
     # I have moved scraping to the server side, it might be slower, but in the long run it will be much better imo, cause we can query cached values
     # get the home page and search for terms
     # current_page_text = BeautifulSoup(requests.get(url).text, 'html.parser')
