@@ -1,7 +1,27 @@
 from threading import Thread
-from Queue import Queue, Empty
 import numpy as np
 import string
+import sys
+
+if sys.version_info >= (3, 0):
+    from queue import Queue, Empty
+else:
+    from Queue import Queue, Empty
+
+
+def _python2_clean_sentences(pure_sentences):
+    clean_sentences = []
+    for x in pure_sentences:
+        clean_sentences.append(' '.join(x.lower().translate(None, string.punctuation).split()))
+    return clean_sentences
+
+
+def _python3_clean_sentences(pure_sentences):
+    clean_sentences = []
+    translator = str.maketrans('', '', string.punctuation)
+    for x in pure_sentences:
+        clean_sentences.append(' '.join(x.lower().translate(translator).split()))
+    return clean_sentences
 
 
 def prepare_for_regex(input_str, delimiter="."):
@@ -13,9 +33,10 @@ def prepare_for_regex(input_str, delimiter="."):
     for i, x in enumerate(pure_sentences):
         pure_sentences[i] = x.strip() + "."
 
-    clean_sentences = []
-    for x in pure_sentences:
-        clean_sentences.append(' '.join(x.lower().translate(None, string.punctuation).split()))
+    if sys.version_info >= (3, 0):
+        clean_sentences = _python3_clean_sentences(pure_sentences)
+    else:
+        clean_sentences = _python2_clean_sentences(pure_sentences)
 
     return clean_sentences, pure_sentences
 

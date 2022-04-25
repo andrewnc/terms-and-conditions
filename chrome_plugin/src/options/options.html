@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>Legal Leaf Options</title></head>
+<style>
+    .outer_div {
+        width: 100%;
+    }
+
+    .inner_div {
+        max-width: 800px;
+        width: 100%;
+        text-align: center;
+        margin: auto;
+    }
+
+    .label-div {
+        margin: 5px 0px;
+    }
+</style>
+<body>
+
+<div class="outer_div">
+    <div class="inner_div">
+        <div class="label-div">
+            <label>
+              Developer Mode
+              <input type="checkbox" id="developer_mode">
+            </label>
+        </div>
+        <div class="label-div">
+            <label>
+                Protocol
+                <input type="text" id="protocol">
+            </label>
+        </div>
+        <div class="label-div">
+            <label>
+                IP Address
+                <input type="text" id="server_ip">
+            </label>
+        </div>
+        <div class="label-div">
+            <label>
+                Port Number
+                <input type="text" id="port">
+            </label>
+        </div>
+        <div class="label-div">
+            <label>
+                Path
+                <input type="text" id="path">
+            </label>
+        </div>
+
+        <div id="status"></div>
+        <button id="save">Save</button>
+
+        <script src="options.js"></script>
+    </div>
+</div>
+</body>
+</html>

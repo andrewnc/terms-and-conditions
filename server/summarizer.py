@@ -1,27 +1,30 @@
 import json
 import re
-from urlparse import urlparse
-
-import webapp2
 import requests
+import sys
+
+import unidecode
 from bs4 import BeautifulSoup
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.kl import KLSummarizer
-import unidecode
 
 from preprocessing import prepare_for_regex
 
-import logging
+if sys.version_info >= (3, 0):
+    from urllib.parse import unquote
+else:
+    from urlparse import unquote
 
-# globals
+# Globals
 LANGUAGE = 'english'
-SENTENCES_COUNT = 15
-clause = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)", re.IGNORECASE)
-host_reg = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
-terms_page = re.compile(r"(terms *(((and|&)? *conditions)|((of)? ?(service|use))))", re.IGNORECASE)
-terms_link_finder = re.compile(r"(T|t)erms")
+SENTENCES_COUNT = 10
+
+TERMS_PAGE_RE = re.compile(r"(terms *(((and|&)? *conditions)|((of)? ?(service|use))))", re.IGNORECASE)
+HOST_RE = re.compile('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*')
+TERMS_LINK_RE = re.compile(r"(T|t)erms")
+CLAUSE_RE = re.compile("(will)|(agree)|(must)|(responsib)|(waive)|(lawsuit)|(modify)|(intellec)", re.IGNORECASE)
 
 # file structure for display, will update
 HTML_OPEN = "<div id='mainPopup'>"
@@ -30,57 +33,42 @@ THEY_AGREE_HEADER = "<div id='theyAgree' class='header'>What They Agree</div>"
 OTHER_HEADER = "<div id='other' class='header'>Other Clauses</div>"
 
 
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('Hello, World!')
-
-        # return render_template("Legal Leaf.htm")
-
-
-class SummarizerHandler(webapp2.RequestHandler):
-    def post(self):
-        self.response.headers['Content-Type'] = 'text/json'
-        self.response.write(summarize(self.request.body, self.request.headers['target_url']))
-
-
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/webapi/summarize', SummarizerHandler),
-], debug=True)
-
-
 def summarize(html_body, url):
     html_soup = BeautifulSoup(html_body, "html.parser")
     body_txt = html_soup.text
     url = url.strip()
 
-    is_terms_page = re.match(terms_page, body_txt)
-    if not is_terms_page:
-        body_txt = find_terms_text(html_soup, url)
+    is_terms_page = re.match(TERMS_PAGE_RE, body_txt)
     return summarize_terms_text(body_txt)
 
 
 def find_terms_text(html_soup, url):
-    host_url = re.search(host_reg, url).group(1)
+    host_url = re.search(HOST_RE, url).group(1)
 
     terms_text = ""
-    for link in html_soup.find_all("a", text=terms_link_finder):
+    for link in html_soup.find_all("a", text=TERMS_LINK_RE):
         if "http" in link['href']:
-            terms_text += BeautifulSoup(requests.get(link['href']).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get(link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
         else:
-            terms_text += BeautifulSoup(requests.get("https://" + host_url + link['href']).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get("http://" + host_url + link['href']).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
 
     if terms_text == "":
+        print("googling", host_url)
         links = []
         google_results = BeautifulSoup(
             requests.get("https://www.google.com/search?q={}{}".format(host_url, "%20terms%20and%20conditions")).text,
             'html.parser')
         for link in google_results.find_all("div", {"class": "g"})[:1]:
-            links.append(urlparse(link.find("a").attrs['href'][7:].split("&")[0]))
+            links.append(unquote(link.find("a").attrs['href'][7:].split("&")[0]))
 
         for link in links:
-            terms_text += BeautifulSoup(requests.get(link).text, 'html.parser').text
+            soup = BeautifulSoup(requests.get(link).text, 'html.parser')
+            soup = decomp(soup)
+            terms_text += soup.text
 
     return terms_text
 
@@ -91,7 +79,7 @@ def summarize_terms_text(txt):
 
     data_to_summarize = []
     for clean, pure in zip(clean_list, pure_list):
-        if re.findall(clause, clean):
+        if re.findall(CLAUSE_RE, clean):
             data_to_summarize.append(pure)
 
     text_data = " ".join(data_to_summarize)
@@ -102,7 +90,7 @@ def summarize_terms_text(txt):
     summary = summarizer(parser.document, SENTENCES_COUNT)
 
     if len(summary) == 0:
-        summary = ["No Terms"]
+        summary = ["No Terms found, if this is wrong, contact us at andrew@leaf.legal"]
 
     sentences = [str(x) for x in summary]
     message = HTML_OPEN + "<ul class='rolldown-list' id='myList'>"
@@ -144,3 +132,20 @@ def summarize_terms_text(txt):
     message += "</ul></div>"
 
     return json.dumps(message)
+
+
+def decomp(soup):
+    try:
+        soup.footer.decompose()
+    except:
+        soup = soup
+    try:
+        soup.head.decompose()
+    except:
+        soup = soup
+    try:
+        for script in soup(["script", "style"]):
+            script.decompose()  # rip it out
+    except:
+        soup = soup
+    return soup
